@@ -5,6 +5,8 @@ from __future__ import print_function
 import argparse
 import numpy as np
 import os
+import torch
+import torch.nn as nn
 from pytorch_mlp import MLP
 
 # Default constants
@@ -21,18 +23,40 @@ def accuracy(predictions, targets):
     of the network.
     Args:
         predictions: 2D float array of size [number_of_data_samples, n_classes]
-        labels: 2D int array of size [number_of_data_samples, n_classes] with one-hot encoding of ground-truth labels
+        targets: 1D int array of size [number_of_data_samples] with ground-truth labels
     Returns:
         accuracy: scalar float, the accuracy of predictions.
     """
-    return accuracy
+    # Get predicted class (argmax over class dimension)
+    pred_classes = torch.argmax(predictions, dim=1)
+    # Calculate accuracy
+    correct = (pred_classes == targets).float()
+    acc = correct.mean().item()
+    return acc
 
 def train():
     """
     Performs training and evaluation of MLP model.
     NOTE: You should the model on the whole test set each eval_freq iterations.
     """
-    # YOUR TRAINING CODE GOES HERE
+    # Parse the hidden units
+    n_hidden = [int(x) for x in FLAGS.dnn_hidden_units.split(',')]
+    
+    # Note: This is a skeleton. In a real implementation, you would need to:
+    # 1. Load your data (e.g., using sklearn.datasets.make_moons)
+    # 2. Create train/test split
+    # 3. Initialize the model
+    # 4. Set up optimizer and loss function
+    # 5. Train the model
+    # 6. Evaluate periodically
+    
+    print("Training configuration:")
+    print(f"  Hidden units: {n_hidden}")
+    print(f"  Learning rate: {FLAGS.learning_rate}")
+    print(f"  Max epochs: {FLAGS.max_steps}")
+    print(f"  Eval frequency: {FLAGS.eval_freq}")
+    print("\nNote: This is a skeleton implementation.")
+    print("To use this, you need to provide training data in your notebook or script.")
 
 
 def main():

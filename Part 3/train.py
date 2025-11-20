@@ -7,6 +7,7 @@ import time
 import numpy as np
 
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from dataset import PalindromeDataset
@@ -15,30 +16,55 @@ from vanilla_rnn import VanillaRNN
 def train(config):
 
     # Initialize the model that we are going to use
-    model = None  # fixme
+    model = VanillaRNN(
+        seq_length=config.input_length,
+        input_dim=config.input_dim,
+        hidden_dim=config.num_hidden,
+        output_dim=config.num_classes,
+        batch_size=config.batch_size
+    )
 
     # Initialize the dataset and data loader (leave the +1)
     dataset = PalindromeDataset(config.input_length+1)
     data_loader = DataLoader(dataset, config.batch_size, num_workers=1)
 
     # Setup the loss and optimizer
-    criterion = None  # fixme
-    optimizer = None  # fixme
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
 
     for step, (batch_inputs, batch_targets) in enumerate(data_loader):
 
-        # Add more code here ...
+        # Convert inputs to float tensor
+        batch_inputs = batch_inputs.float()
+        batch_targets = batch_targets.long()
+        
+        # Zero gradients
+        optimizer.zero_grad()
+        
+        # Forward pass
+        predictions = model(batch_inputs)
+        
+        # Compute loss (only on last timestep)
+        loss = criterion(predictions, batch_targets)
+        
+        # Backward pass
+        loss.backward()
 
         # the following line is to deal with exploding gradients
-        torch.nn.utils.clip_grad_norm(model.parameters(), max_norm=config.max_norm)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=config.max_norm)
 
-        # Add more code here ...
+        # Update weights
+        optimizer.step()
 
-        loss = np.inf   # fixme
-        accuracy = 0.0  # fixme
+        # Compute accuracy
+        with torch.no_grad():
+            pred_classes = torch.argmax(predictions, dim=1)
+            correct = (pred_classes == batch_targets).float()
+            accuracy = correct.mean().item()
 
         if step % 10 == 0:
-            # print acuracy/loss here
+            # print accuracy/loss here
+            print(f'[{step:5d}] Loss = {loss.item():.4f}, Accuracy = {accuracy:.4f}')
 
         if step == config.train_steps:
             # If you receive a PyTorch data-loader error, check this bug report:
