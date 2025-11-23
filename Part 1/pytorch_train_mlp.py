@@ -72,6 +72,10 @@ def train(model, train_loader, test_loader, n_epochs, learning_rate, eval_freq=1
         for batch_x, batch_y in train_loader:
             batch_x, batch_y = batch_x.to(device), batch_y.to(device)
             
+            # Flatten input if it's an image (has more than 2 dimensions)
+            if len(batch_x.shape) > 2:
+                batch_x = batch_x.view(batch_x.size(0), -1)
+            
             optimizer.zero_grad()
             outputs = model(batch_x)
             loss = criterion(outputs, batch_y)
@@ -92,6 +96,9 @@ def train(model, train_loader, test_loader, n_epochs, learning_rate, eval_freq=1
                 train_total = 0
                 for batch_x, batch_y in train_loader:
                     batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+                    # Flatten input if it's an image (has more than 2 dimensions)
+                    if len(batch_x.shape) > 2:
+                        batch_x = batch_x.view(batch_x.size(0), -1)
                     outputs = model(batch_x)
                     train_correct += (torch.argmax(outputs, dim=1) == batch_y).sum().item()
                     train_total += batch_y.size(0)
@@ -103,6 +110,9 @@ def train(model, train_loader, test_loader, n_epochs, learning_rate, eval_freq=1
                 test_total = 0
                 for batch_x, batch_y in test_loader:
                     batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+                    # Flatten input if it's an image (has more than 2 dimensions)
+                    if len(batch_x.shape) > 2:
+                        batch_x = batch_x.view(batch_x.size(0), -1)
                     outputs = model(batch_x)
                     test_correct += (torch.argmax(outputs, dim=1) == batch_y).sum().item()
                     test_total += batch_y.size(0)
